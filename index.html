@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube Reimagined</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+            background: #0f0f0f;
+            color: #fff;
+            transition: background 0.3s ease;
+        }
+
+        body.learn-mode {
+            background: #0a1929;
+        }
+
+        body.relax-mode {
+            background: #0f0f0f;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Mode Selection Screen */
+        .mode-selection {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .mode-selection h1 {
+            font-size: 3rem;
+            margin-bottom: 0.5rem;
+            font-weight: 700;
+        }
+
+        .mode-selection p {
+            font-size: 1.3rem;
+            color: #aaa;
+            margin-bottom: 4rem;
+            max-width: 600px;
+        }
+
+        .mode-buttons {
+            display: flex;
+            gap: 3rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .mode-btn {
+            padding: 3rem 4rem;
+            font-size: 1.5rem;
+            font-weight: 600;
+            border: none;
+            border-radius: 16px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            min-width: 280px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .mode-btn:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(0,0,0,0.4);
+        }
+
+        .mode-btn-icon {
+            font-size: 3rem;
+        }
+
+        .mode-btn-text {
+            font-size: 1.5rem;
+        }
+
+        .mode-btn-desc {
+            font-size: 0.95rem;
+            font-weight: 400;
+            opacity: 0.9;
+            margin-top: 0.5rem;
+        }
+
+        .learn-btn {
+            background: linear-gradient(135deg, #3ea6ff 0%, #2d7ac7 100%);
+            color: #fff;
+        }
+
+        .relax-btn {
+            background: linear-gradient(135deg, #ff6b6b 0%, #c92a2a 100%);
+            color: #fff;
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 2rem;
+            background: #212121;
+            margin-bottom: 1rem;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .mode-indicator {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.5rem 1rem;
+            background: #3a3a3a;
+            border-radius: 8px;
+        }
+
+        .mode-text {
+            font-size: 0.9rem;
+            color: #aaa;
+        }
+
+        .mode-badge {
+            padding: 0.3rem 0.8rem;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .mode-badge.learn {
+            background: #3ea6ff;
+        }
+
+        .mode-badge.relax {
+            background: #ff6b6b;
+        }
+
+        .switch-mode-btn {
+            padding: 0.4rem 1rem;
+            background: transparent;
+            border: 1px solid #fff;
+            color: #fff;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+        }
+
+        .switch-mode-btn:hover {
+            background: #3a3a3a;
+        }
+
+        /* Navigation */
+        .nav {
+            display: flex;
+            gap: 1.5rem;
+            padding: 1rem 2rem;
+            background: #212121;
+            margin-bottom: 1rem;
+        }
+
+        .nav-item {
+            padding: 0.5rem 1rem;
+            background: transparent;
+            border: none;
+            color: #fff;
+            cursor: pointer;
+            font-size: 1rem;
+            border-radius: 6px;
+        }
+
+        .nav-item:hover, .nav-item.active {
+            background: #3a3a3a;
+        }
+
+        /* Banner */
+        .banner {
+            background: #3ea6ff;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            text-align: center;
+            font-weight: 500;
+        }
+
+        /* Subject Chips */
+        .subject-chips {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            padding: 0 2rem;
+        }
+
+        .chip {
+            padding: 0.6rem 1.2rem;
+            background: #1e3a5f;
+            border: 2px solid #2d5a8f;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .chip:hover {
+            background: #2d5a8f;
+            transform: translateY(-2px);
+        }
+
+        .chip.active {
+            background: #3ea6ff;
+            border-color: #3ea6ff;
+        }
+
+        /* Home Search Bar */
+        .home-search {
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto 1.5rem auto;
+            padding: 0.8rem 1.2rem;
+            background: #212121;
+            border: 2px solid #3a3a3a;
+            border-radius: 8px;
+            color: #fff;
+            font-size: 1rem;
+        }
+
+        .home-search:focus {
+            outline: none;
+            border-color: #3ea6ff;
+        }
+
+        /* Video Grid */
+        .video-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .video-card {
+            background: #212121;
+            border-radius: 12px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .video-card:hover {
+            transform: translateY(-4px);
+        }
+
+        .video-thumbnail {
+            width: 100%;
+            height: 180px;
+            background: #3a3a3a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+        }
+
+        .video-info {
+            padding: 1rem;
+        }
+
+        .video-title {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .video-meta {
+            font-size: 0.85rem;
+            color: #aaa;
+        }
+
+        /* Saved Page */
+        .search-bar {
+            width: 100%;
+            padding: 0.8rem 1.2rem;
+            background: #212121;
+            border: 2px solid #3a3a3a;
+            border-radius: 8px;
+            color: #fff;
+            font-size: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .search-bar:focus {
+            outline: none;
+            border-color: #3ea6ff;
+        }
+
+        .saved-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .saved-item {
+            background: #212121;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .saved-item-title {
+            font-size: 1rem;
+        }
+
+        .saved-item-meta {
+            font-size: 0.85rem;
+            color: #aaa;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: #212121;
+            padding: 2rem;
+            border-radius: 12px;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        .modal-content h3 {
+            margin-bottom: 1rem;
+            font-size: 1.3rem;
+        }
+
+        .modal-content p {
+            margin-bottom: 1.5rem;
+            color: #aaa;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+        }
+
+        .modal-btn {
+            padding: 0.7rem 1.5rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        .modal-btn-primary {
+            background: #ff6b6b;
+            color: #fff;
+        }
+
+        .modal-btn-secondary {
+            background: #3a3a3a;
+            color: #fff;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- Mode Selection Screen -->
+    <div id="modeSelection" class="mode-selection">
+        <h1>Welcome to YouTube</h1>
+        <p>Choose how you want to experience YouTube right now</p>
+        <div class="mode-buttons">
+            <button class="mode-btn learn-btn" onclick="selectMode('learn')">
+                <div class="mode-btn-icon">📚</div>
+                <div class="mode-btn-text">Learn Mode</div>
+                <div class="mode-btn-desc">Focused learning, Shorts disabled</div>
+            </button>
+            <button class="mode-btn relax-btn" onclick="selectMode('relax')">
+                <div class="mode-btn-icon">🎬</div>
+                <div class="mode-btn-text">Relax Mode</div>
+                <div class="mode-btn-desc">Explore & enjoy, all features enabled</div>
+            </button>
+        </div>
+    </div>
+
+    <!-- Main App -->
+    <div id="mainApp" class="hidden">
+        <!-- Header -->
+        <div class="header">
+            <div class="logo">YouTube</div>
+            <div class="mode-indicator">
+                <span class="mode-badge" id="modeBadge"></span>
+                <span class="mode-text" id="modeText"></span>
+                <button class="switch-mode-btn" onclick="showModeSelection()">Change Mode</button>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <div class="nav">
+            <button class="nav-item active" onclick="showHome()">Home</button>
+            <button class="nav-item" id="shortsBtn" onclick="handleShortsClick()">Shorts</button>
+            <button class="nav-item" onclick="showSaved()">Saved</button>
+        </div>
+
+        <!-- Home Screen -->
+        <div id="homeScreen" class="container">
+            <div id="shortsBanner" class="banner hidden">
+                🔒 Shorts are disabled in Learn mode to help you stay focused.
+            </div>
+            <input type="text" class="home-search" id="homeSearchBar" placeholder="Search videos...">
+            <div id="subjectChips" class="subject-chips hidden">
+                <button class="chip" onclick="filterBySubject('all')">All</button>
+                <button class="chip" onclick="filterBySubject('coding')">💻 Coding</button>
+                <button class="chip" onclick="filterBySubject('math')">📐 Math</button>
+                <button class="chip" onclick="filterBySubject('science')">🔬 Science</button>
+            </div>
+            <div class="video-grid" id="videoGrid"></div>
+        </div>
+
+        <!-- Saved Screen -->
+        <div id="savedScreen" class="container hidden">
+            <h2 style="margin-bottom: 1rem;">Your Learning Library</h2>
+            <input type="text" class="search-bar" id="searchBar" placeholder="Search saved videos...">
+            <div class="saved-list" id="savedList"></div>
+        </div>
+
+        <!-- Shorts Screen -->
+        <div id="shortsScreen" class="container hidden">
+            <h2 style="margin-bottom: 1rem;">Shorts Feed</h2>
+            <div style="text-align: center; padding: 4rem 2rem; color: #aaa;">
+                <div style="font-size: 4rem; margin-bottom: 1rem;">🎬</div>
+                <p style="font-size: 1.2rem;">Shorts placeholder - Swipe up to watch short videos</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <h3>Shorts Disabled</h3>
+            <p>Shorts are disabled in Learn mode. Switch to Relax mode to access Shorts?</p>
+            <div class="modal-buttons">
+                <button class="modal-btn modal-btn-primary" onclick="switchToRelax()">Switch to Relax</button>
+                <button class="modal-btn modal-btn-secondary" onclick="closeModal()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentMode = null;
+        let currentFilter = 'all';
+
+        const learnVideos = [
+            // Coding
+            { id: 1, title: 'Introduction to Machine Learning', channel: 'Tech Academy', views: '1.2M', category: 'coding' },
+            { id: 2, title: 'Advanced JavaScript Concepts', channel: 'Code Masters', views: '850K', category: 'coding' },
+            { id: 3, title: 'Building Modern Web Apps', channel: 'Web Dev Pro', views: '2.1M', category: 'coding' },
+            { id: 4, title: 'Python for Data Science', channel: 'Data Learn', views: '1.8M', category: 'coding' },
+            { id: 5, title: 'React Best Practices 2024', channel: 'Frontend Hub', views: '920K', category: 'coding' },
+            { id: 6, title: 'System Design Fundamentals', channel: 'Tech Interview', views: '1.5M', category: 'coding' },
+            { id: 7, title: 'Data Structures and Algorithms', channel: 'CS Academy', views: '2.3M', category: 'coding' },
+            { id: 8, title: 'TypeScript Complete Guide', channel: 'Code Masters', views: '1.1M', category: 'coding' },
+            // Math
+            { id: 9, title: 'Linear Algebra for Beginners', channel: 'Math Pro', views: '980K', category: 'math' },
+            { id: 10, title: 'Calculus I - Complete Course', channel: 'Math Academy', views: '1.4M', category: 'math' },
+            { id: 11, title: 'Probability Theory Explained', channel: 'Stats Master', views: '750K', category: 'math' },
+            { id: 12, title: 'Advanced Algebra Techniques', channel: 'Math Pro', views: '620K', category: 'math' },
+            { id: 13, title: 'Differential Equations Made Easy', channel: 'Math Academy', views: '890K', category: 'math' },
+            { id: 14, title: 'Statistics for Data Science', channel: 'Stats Master', views: '1.2M', category: 'math' },
+            // Science
+            { id: 15, title: 'Physics Basics - Motion and Forces', channel: 'Science Hub', views: '1.6M', category: 'science' },
+            { id: 16, title: 'Organic Chemistry Fundamentals', channel: 'Chem Lab', views: '940K', category: 'science' },
+            { id: 17, title: 'Introduction to Quantum Mechanics', channel: 'Physics World', views: '1.1M', category: 'science' },
+            { id: 18, title: 'Biology - Cell Structure and Function', channel: 'Bio Learn', views: '1.3M', category: 'science' },
+            { id: 19, title: 'Thermodynamics Explained', channel: 'Physics World', views: '780K', category: 'science' },
+            { id: 20, title: 'Chemical Bonding Concepts', channel: 'Chem Lab', views: '850K', category: 'science' }
+        ];
+
+        const relaxVideos = [
+            { id: 21, title: 'Top 10 Anime Fights of 2025', channel: 'Anime Zone', views: '3.2M', category: 'entertainment' },
+            { id: 22, title: 'Best Minecraft Build Ideas', channel: 'Gaming Hub', views: '2.8M', category: 'entertainment' },
+            { id: 23, title: 'Epic Gaming Moments Compilation', channel: 'Game Clips', views: '1.9M', category: 'entertainment' },
+            { id: 24, title: 'Attack on Titan Season Recap', channel: 'Anime Review', views: '2.4M', category: 'entertainment' },
+            { id: 25, title: 'GTA 6 Gameplay First Look', channel: 'Gaming News', views: '5.1M', category: 'entertainment' },
+            { id: 26, title: 'One Piece Theory Discussion', channel: 'Anime Theory', views: '1.7M', category: 'entertainment' },
+            { id: 27, title: 'Fortnite Pro Tips and Tricks', channel: 'Pro Gamers', views: '2.2M', category: 'entertainment' },
+            { id: 28, title: 'My Hero Academia AMV', channel: 'AMV Creator', views: '980K', category: 'entertainment' },
+            { id: 29, title: 'Valorant Highlights Montage', channel: 'FPS Clips', views: '1.4M', category: 'entertainment' },
+            { id: 30, title: 'Demon Slayer Best Scenes', channel: 'Anime Cuts', views: '3.5M', category: 'entertainment' },
+            { id: 31, title: 'League of Legends Outplay Moments', channel: 'LOL Plays', views: '1.8M', category: 'entertainment' },
+            { id: 32, title: 'Naruto vs Sasuke Analysis', channel: 'Anime Breakdown', views: '2.1M', category: 'entertainment' },
+            { id: 33, title: 'Call of Duty Warzone Tips', channel: 'COD Guide', views: '1.6M', category: 'entertainment' },
+            { id: 34, title: 'Jujutsu Kaisen Power Rankings', channel: 'Anime Power', views: '1.3M', category: 'entertainment' },
+            { id: 35, title: 'Apex Legends Movement Guide', channel: 'Apex Pro', views: '950K', category: 'entertainment' }
+        ];
+
+        const savedVideos = [
+            { id: 1, title: 'Introduction to Machine Learning', duration: '45:30' },
+            { id: 2, title: 'Advanced JavaScript Concepts', duration: '32:15' },
+            { id: 6, title: 'Data Structures and Algorithms Masterclass', duration: '2:15:45' },
+            { id: 7, title: 'React Hooks Deep Dive', duration: '38:20' },
+            { id: 8, title: 'Python for Beginners Complete Course', duration: '3:45:10' },
+            { id: 10, title: 'Calculus I - Complete Course', duration: '1:24:35' },
+            { id: 11, title: 'Probability Theory Explained', duration: '42:18' },
+            { id: 15, title: 'Physics Basics - Motion and Forces', duration: '56:40' },
+            { id: 9, title: 'Time Management Techniques for Students', duration: '22:15' },
+            { id: 10, title: 'How to Study Effectively Using Spaced Repetition', duration: '18:40' },
+            { id: 11, title: 'Productivity Systems That Actually Work', duration: '35:55' },
+            { id: 12, title: 'Understanding Neural Networks', duration: '41:30' },
+            { id: 13, title: 'Git and GitHub for Beginners', duration: '29:50' },
+            { id: 14, title: 'Building REST APIs with Node.js', duration: '1:12:25' },
+            { id: 16, title: 'The Science of Learning and Memory', duration: '33:40' },
+            { id: 17, title: 'TypeScript Tutorial for JavaScript Developers', duration: '48:20' },
+            { id: 18, title: 'Binary Search Trees Explained', duration: '24:10' },
+            { id: 19, title: 'Focus Techniques for Deep Work', duration: '19:30' }
+        ];
+
+        function selectMode(mode) {
+            currentMode = mode;
+            document.getElementById('modeSelection').classList.add('hidden');
+            document.getElementById('mainApp').classList.remove('hidden');
+            updateUI();
+        }
+
+        function showModeSelection() {
+            document.getElementById('mainApp').classList.add('hidden');
+            document.getElementById('modeSelection').classList.remove('hidden');
+            currentMode = null;
+        }
+
+        function updateUI() {
+            const badge = document.getElementById('modeBadge');
+            const modeText = document.getElementById('modeText');
+            const banner = document.getElementById('shortsBanner');
+            const chips = document.getElementById('subjectChips');
+            
+            if (currentMode === 'learn') {
+                badge.textContent = '📚 Learn Mode';
+                badge.className = 'mode-badge learn';
+                modeText.textContent = 'Focused Learning';
+                banner.classList.remove('hidden');
+                chips.classList.remove('hidden');
+                document.body.className = 'learn-mode';
+            } else {
+                badge.textContent = '🎬 Relax Mode';
+                badge.className = 'mode-badge relax';
+                modeText.textContent = 'Explore & Enjoy';
+                banner.classList.add('hidden');
+                chips.classList.add('hidden');
+                document.body.className = 'relax-mode';
+            }
+            
+            currentFilter = 'all';
+            renderVideos();
+        }
+
+        function renderVideos() {
+            const grid = document.getElementById('videoGrid');
+            const videos = currentMode === 'learn' ? learnVideos : relaxVideos;
+            const homeSearch = document.getElementById('homeSearchBar').value.toLowerCase();
+            
+            let filteredVideos = currentFilter === 'all' 
+                ? videos 
+                : videos.filter(v => v.category === currentFilter);
+            
+            if (homeSearch) {
+                filteredVideos = filteredVideos.filter(v => 
+                    v.title.toLowerCase().includes(homeSearch) ||
+                    v.channel.toLowerCase().includes(homeSearch)
+                );
+            }
+            
+            grid.innerHTML = filteredVideos.map(v => `
+                <div class="video-card">
+                    <div class="video-thumbnail">📹</div>
+                    <div class="video-info">
+                        <div class="video-title">${v.title}</div>
+                        <div class="video-meta">${v.channel} • ${v.views} views</div>
+                    </div>
+                </div>
+            `).join('');
+            
+            // Update chip active states
+            document.querySelectorAll('.chip').forEach(chip => {
+                chip.classList.remove('active');
+            });
+        }
+
+        function filterBySubject(subject) {
+            currentFilter = subject;
+            renderVideos();
+            
+            // Update active chip
+            document.querySelectorAll('.chip').forEach(chip => {
+                chip.classList.remove('active');
+                if ((subject === 'all' && chip.textContent === 'All') ||
+                    (subject === 'coding' && chip.textContent.includes('Coding')) ||
+                    (subject === 'math' && chip.textContent.includes('Math')) ||
+                    (subject === 'science' && chip.textContent.includes('Science'))) {
+                    chip.classList.add('active');
+                }
+            });
+        }
+
+        function handleShortsClick() {
+            if (currentMode === 'learn') {
+                document.getElementById('modal').classList.add('active');
+            } else {
+                showShorts();
+            }
+        }
+
+        function closeModal() {
+            document.getElementById('modal').classList.remove('active');
+        }
+
+        function switchToRelax() {
+            currentMode = 'relax';
+            closeModal();
+            updateUI();
+        }
+
+        function showHome() {
+            document.getElementById('homeScreen').classList.remove('hidden');
+            document.getElementById('savedScreen').classList.add('hidden');
+            document.getElementById('shortsScreen').classList.add('hidden');
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+            document.querySelectorAll('.nav-item')[0].classList.add('active');
+        }
+
+        function showShorts() {
+            document.getElementById('homeScreen').classList.add('hidden');
+            document.getElementById('savedScreen').classList.add('hidden');
+            document.getElementById('shortsScreen').classList.remove('hidden');
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+            document.querySelectorAll('.nav-item')[1].classList.add('active');
+        }
+
+        function showSaved() {
+            document.getElementById('homeScreen').classList.add('hidden');
+            document.getElementById('savedScreen').classList.remove('hidden');
+            document.getElementById('shortsScreen').classList.add('hidden');
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+            document.querySelectorAll('.nav-item')[2].classList.add('active');
+            renderSavedVideos();
+        }
+
+        function renderSavedVideos(filter = '') {
+            const list = document.getElementById('savedList');
+            const filtered = savedVideos.filter(v => 
+                v.title.toLowerCase().includes(filter.toLowerCase())
+            );
+            
+            list.innerHTML = filtered.map(v => `
+                <div class="saved-item">
+                    <div>
+                        <div class="saved-item-title">${v.title}</div>
+                        <div class="saved-item-meta">${v.duration}</div>
+                    </div>
+                    <div>💾</div>
+                </div>
+            `).join('');
+        }
+
+        document.getElementById('searchBar').addEventListener('input', (e) => {
+            renderSavedVideos(e.target.value);
+        });
+
+        document.getElementById('homeSearchBar').addEventListener('input', () => {
+            renderVideos();
+        });
+    </script>
+</body>
+</html>
